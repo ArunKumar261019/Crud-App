@@ -1,22 +1,42 @@
-# Three-Tier CRUD Application
+# Docker Compose Practice Project
 
-React + .NET 8 Web API + MySQL, designed for learning Docker Compose.
+This practice environment sets up a complete 3-tier web application using Docker Compose:
+- **Frontend**: Nginx serving a static web application
+- **Backend**: Node.js / Express REST API
+- **Database**: PostgreSQL with initial seed data
 
-## Run
+---
 
-docker compose up --build
+## 🚀 How to Run
 
-Open http://localhost:3000
+1. **Extract the ZIP file** to your preferred folder.
+2. Open your terminal/command prompt in the extracted folder (`docker_practice_project`).
+3. Run the following command:
+   ```bash
+   docker-compose up --build
+   ```
+4. Access the applications in your web browser:
+   - **Frontend UI**: [http://localhost:3000](http://localhost:3000)
+   - **Backend API**: [http://localhost:5000/api/items](http://localhost:5000/api/items)
+   - **PostgreSQL**: Accessible at `localhost:5432`
 
-## Useful commands
+---
 
-docker compose ps
-docker compose logs backend
-docker compose logs database
-docker compose down
-docker compose down -v
+## 🛑 Useful Commands
 
-## Architecture
-Frontend (3000) -> Backend (5000) -> MySQL (3306)
-
-The backend connects to MySQL using `Server=database` because `database` is the Compose service name.
+- **Stop containers**:
+  ```bash
+  docker-compose down
+  ```
+- **Stop containers and clear database volume**:
+  ```bash
+  docker-compose down -v
+  ```
+- **Run in detached (background) mode**:
+  ```bash
+  docker-compose up -d --build
+  ```
+- **Check running container logs**:
+  ```bash
+  docker-compose logs -f
+  ```

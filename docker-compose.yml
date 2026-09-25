@@ -1,32 +1,35 @@
 services:
   database:
-    image: mysql:8.0
-    restart: unless-stopped
+    image: postgres:16-alpine
+    container_name: simple-db
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: EmployeeDB
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppassword
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - dbdata:/var/lib/postgresql/data
     networks:
       - app-network
 
   backend:
     build: ./backend
-    restart: unless-stopped
+    container_name: simple-backend
     environment:
-      ASPNETCORE_URLS: http://+:5000
-      ConnectionStrings__Default: Server=database;Port=3306;Database=EmployeeDB;User=root;Password=rootpassword;
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: appdb
+      DB_USER: appuser
+      DB_PASSWORD: apppassword
     depends_on:
       - database
-    expose:
-      - "5000"
+    ports:
+      - "5000:5000"
     networks:
       - app-network
 
   frontend:
     build: ./frontend
-    restart: unless-stopped
+    container_name: simple-frontend
     depends_on:
       - backend
     ports:
@@ -35,8 +38,7 @@ services:
       - app-network
 
 volumes:
-  mysql_data:
+  dbdata:
 
 networks:
   app-network:
-    driver: bridge

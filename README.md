@@ -1,68 +1,116 @@
-# Three-Tier Employee CRUD - EC2 Ready
+# Simple 3-Tier Docker Application
 
-Architecture:
-Browser -> Nginx/React :80 -> /api proxy -> .NET 8 backend :5000 -> MySQL :3306
+This project is designed for practicing Docker and Docker Compose on an AWS EC2 Ubuntu instance.
 
-Only port 80 needs to be public in the EC2 Security Group. Backend and MySQL are internal Docker services and are NOT published to the EC2 host.
+## Architecture
 
-## EC2 Security Group
-Inbound rules recommended:
-- SSH TCP 22: My IP (your public IP), not 0.0.0.0/0 if possible
-- HTTP TCP 80: 0.0.0.0/0
-Do NOT open 3306 or 5000 to the internet for this learning setup.
+Browser
+  |
+  v
+Frontend (React + Nginx) :80
+  |
+  v
+Backend (Node.js + Express) :5000
+  |
+  v
+Database (PostgreSQL) :5432
 
-## Install Docker on Ubuntu EC2
-Use Docker's official installation method for your Ubuntu version, then verify:
-  docker --version
-  docker compose version
+Docker Compose creates a private Docker network so containers can communicate using service names.
 
-If your user gets permission denied:
-  sudo usermod -aG docker $USER
-  newgrp docker
+## 1. Copy the project to EC2
 
-## Run
-Upload/extract this folder on EC2, then:
-  cd three-tier-crud-ec2
-  docker compose down
-  docker compose up -d --build
-  docker compose ps
+Put this folder on your EC2 instance.
 
-Open in your browser:
-  http://YOUR_EC2_PUBLIC_IP/
+## 2. Start the application
 
-## Verify
-From EC2:
-  curl http://localhost/
-  curl http://localhost/api/employees
+```bash
+cd simple-3-tier-docker-app
+docker compose up -d --build
+```
 
-Expected API response is a JSON array of employees.
+## 3. Check containers
 
-Check logs:
-  docker compose logs frontend
-  docker compose logs backend
-  docker compose logs database
+```bash
+docker compose ps
+```
 
-Check containers:
-  docker compose ps
+You should see:
+- simple-frontend
+- simple-backend
+- simple-db
 
-## If you used an older version and want a fresh database
-WARNING: this deletes the MySQL Docker volume/data:
-  docker compose down -v
-  docker compose up -d --build
+## 4. Open the application
 
-## Important networking explanation
-Do not put localhost in the React API URL. React uses /api/employees.
-Nginx receives /api/employees and forwards it to backend:5000.
-The backend connects to database:3306.
-These Docker service names work because all services are on app-network.
+In your browser:
 
-## If port 80 is already used
-Check:
-  sudo ss -ltnp | grep :80
+http://YOUR_EC2_PUBLIC_IP
 
-If another web server uses port 80, stop it or change the frontend mapping in docker-compose.yml from:
-  - "80:80"
-to:
-  - "8080:80"
-Then open Security Group TCP 8080 and browse http://YOUR_EC2_PUBLIC_IP:8080/.
-For the simplest EC2 setup, use port 80.
+Make sure the EC2 Security Group allows inbound TCP port 80.
+
+## 5. Test the backend directly
+
+```bash
+curl http://YOUR_EC2_PUBLIC_IP:5000/api/items
+```
+
+If you use this test, allow TCP port 5000 in the Security Group.
+
+## 6. View logs
+
+```bash
+docker compose logs frontend
+docker compose logs backend
+docker compose logs database
+```
+
+Or:
+
+```bash
+docker compose logs -f
+```
+
+## 7. Stop the application
+
+```bash
+docker compose down
+```
+
+## 8. Stop and remove database data too
+
+Normally `docker compose down` keeps the named volume.
+
+To remove the database volume:
+
+```bash
+docker compose down -v
+```
+
+WARNING: `-v` deletes the PostgreSQL data stored in the Docker volume.
+
+## Useful Docker commands
+
+```bash
+docker ps
+docker ps -a
+docker images
+docker volume ls
+docker network ls
+
+docker compose up -d
+docker compose down
+docker compose restart
+docker compose logs -f
+```
+
+## What to practice
+
+1. Build all images.
+2. Run all three containers.
+3. Inspect the Docker network.
+4. Inspect the named volume.
+5. Stop only the backend container.
+6. Restart the backend.
+7. Change frontend code and rebuild.
+8. Change database data and verify that it survives `docker compose down`.
+9. Run `docker compose down -v` and observe what happens to the data.
+10. Push the frontend and backend images to Docker Hub.

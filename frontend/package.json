@@ -1,9 +1,15 @@
 {
-  "name": "employee-frontend",
+  "name": "simple-frontend",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
-  "scripts": { "build": "vite build", "dev": "vite --host 0.0.0.0 --port 3000" },
-  "dependencies": { "@vitejs/plugin-react": "^4.3.4", "react": "^19.0.0", "react-dom": "^19.0.0" },
-  "devDependencies": { "vite": "^6.0.0" }
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.6.0",
+    "vite": "^6.4.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {}
 }

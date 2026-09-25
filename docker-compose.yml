@@ -1,41 +1,42 @@
-version: '3.8'
-
 services:
+  database:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: EmployeeDB
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - app-network
+
   backend:
     build: ./backend
-    ports:
-      - "5000:5000"
+    restart: unless-stopped
     environment:
-      - DB_HOST=database
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=appdb
-      - DB_PORT=5432
+      ASPNETCORE_URLS: http://+:5000
+      ConnectionStrings__Default: Server=database;Port=3306;Database=EmployeeDB;User=root;Password=rootpassword;
     depends_on:
       - database
-    restart: always
+    expose:
+      - "5000"
+    networks:
+      - app-network
 
   frontend:
     build: ./frontend
-    ports:
-      - "3000:80"
+    restart: unless-stopped
     depends_on:
       - backend
-    restart: always
-
-  database:
-    image: postgres:15-alpine
-    container_name: postgres_db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: appdb
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: always
+      - "80:80"
+    networks:
+      - app-network
 
 volumes:
-  postgres_data:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
